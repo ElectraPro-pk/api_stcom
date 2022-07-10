@@ -1,0 +1,32 @@
+{
+  "name": "api-for-user-handling",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BHEN14/API_STCOM.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BHEN14/API_STCOM/issues"
+  },
+  "homepage": "https://github.com/BHEN14/API_STCOM#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "fetch": "^1.1.0",
+    "mongodb": "^4.7.0",
+    "node-fetch": "2.0"
+  }
+}

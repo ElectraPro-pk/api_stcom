@@ -87,6 +87,7 @@ app.post("/teacher/:id",async (req,res)=>{
 app.post("/feedbacks/:id",(req,res)=>{
   obj = {
     "from":req.params.id,
+    "name":req.body.name,
     "to":req.body.to,
     "feedback" : req.body.feedback
   }

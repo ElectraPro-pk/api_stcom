@@ -94,20 +94,18 @@ app.post("/feedbacks/:id",(req,res)=>{
   res.sendStatus(200)
 })
 
-app.get("/feedbacks/:id",(req,res)=>{
-  MongoClient.connect(url, function(err, db) {
+app.get("/feedbacks/:id", (req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
     let query = {"to":{"$eq":req.params.id}}
-    dbo.collection("feedbacks").findOne(query, function(err, result) {
-      if (err) return;
-      db.close();
-      if(result)
-        res.send(result)
-      else
-        res.send([])
-      
+    const feeds = dbo.collection("feedbacks").find(query,{sort: { title: 1 }})
+    let r = [];
+    await feeds.forEach(e =>{
+     r.push(e)
     })
+    res.send(r).status(200);
+    //db.close();
   });
 })
 

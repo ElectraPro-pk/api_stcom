@@ -38,10 +38,10 @@ async function LoadStudents() {
      obj = {
       "_id" : st["CMSID"].trim(),
       "name":st["NAME"].trim(),
-      "Friends":[],
-      "Request_Sent":[],
-      "Time_slots":[],
-      "Status":"Offline"
+      "friends":[],
+      "requests":[],
+      "time_slots":[],
+      "status":"Offline"
      }
      InsertData("student",obj)
     }
@@ -60,10 +60,10 @@ async function LoadTeachers() {
      obj = {
       "_id" : st["INS_ID"].trim(),
       "name":st["NAME"].trim(),
-      "Friends":[],
-      "Request":[],
-      "Time_slots":[],
-      "Status":"Offline"
+      "friends":[],
+      "requests":[],
+      "time_slots":[],
+      "status":"Offline"
      }
      InsertData("teacher",obj)
     }

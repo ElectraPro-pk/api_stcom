@@ -28,18 +28,6 @@ const InsertData = (coll,data)=>{
   });
 }
 
-const FindData = async (coll,query= {})=>{
-  MongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var dbo = db.db("Students");
-    dbo.collection(coll).findOne(query, function(err, result) {
-      if (err) return;
-      return result;
-      db.close();
-    })
-  });
-}
-
 
 async function LoadStudents() {
   try {
@@ -117,7 +105,7 @@ app.get("/feedbacks/:id",(req,res)=>{
       if(result)
         res.send(result)
       else
-        res.send({})
+        res.send([])
       
     })
   });
@@ -149,7 +137,7 @@ app.get("/teacher/:id",async (req,res)=>{
       if(result)
         res.send(result)
       else
-        res.send({})
+        res.send([])
       
     })
   });
@@ -165,7 +153,7 @@ app.get("/student/:id",async (req,res)=>{
       if(result)
         res.send(result)
       else
-        res.send({})
+        res.send([])
       
     })
   });

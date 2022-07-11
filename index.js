@@ -118,8 +118,17 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
     dbo.collection("student").updateOne(myquery, newvalues, function(err, re) {
       if (err) res.sendStatus(500);
       
+      const stu = dbo.collection("students").find(myquery,{sort: { title: 1 }})
+    let r = [];
+    await feeds.forEach(e =>{
+     r.push(e)
+    })
         var query1 = {"_id":{"$eq":req.params.to}}
-        var newValue1 = {$push:{"requests":req.params.id}}
+        var obj = {
+          "CMSID":req.params.id,
+          "name":r[0]["NAME"].trim()
+        }
+        var newValue1 = {$push:{"requests":obj}}
         dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){
           if(err) res.sendStatus(500)
           res.send("Updated").status(200)

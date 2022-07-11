@@ -109,28 +109,44 @@ app.get("/feedbacks/:id", (req,res)=>{
     //db.close();
   });
 })
+app.get("/teacher/get-request/:id",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.id}}
+    const teacher = await dbo.collection("teacher").findOne(query,{sort:{_id:1}})
+    console.log(teacher);
+    /*let current = r[0]
+    request = []
+    for(i in current["requests"]){
+      re = current["requests"][i]
+      console.log(re)
+    }
+    res.send(r).status(200);
+    //db.close();
+    */
+  });
+})
 app.get("/student/add-request/:id/:to", (req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
     var myquery = { "_id": {"$eq":req.params.id} };
     var newvalues = { $push: {"requests":req.params.to} };
-    dbo.collection("student").updateOne(myquery, newvalues, function(err, re) {
-      if (err) res.sendStatus(500);
+    dbo.collection("student").updateOne(myquery, newvalues, async function(err, re) {
+      if (err) res.send(err.message).Status(500);
       
-      const stu = dbo.collection("students").find(myquery,{sort: { title: 1 }})
-    let r = [];
-    await feeds.forEach(e =>{
-     r.push(e)
-    })
+      
+      const stu = await dbo.collection("student").findOne(myquery,{sort: { _id: 1 }})
+        console.log(stu)
         var query1 = {"_id":{"$eq":req.params.to}}
         var obj = {
           "CMSID":req.params.id,
-          "name":r[0]["NAME"].trim()
+          "name":stu["NAME"]
         }
         var newValue1 = {$push:{"requests":obj}}
         dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){
-          if(err) res.sendStatus(500)
+          if(err) res.send(err.message).Status(500);
           res.send("Updated").status(200)
           db.close();
         })

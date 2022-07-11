@@ -117,9 +117,14 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
     var newvalues = { $push: {"requests":req.params.to} };
     dbo.collection("student").updateOne(myquery, newvalues, function(err, re) {
       if (err) res.sendStatus(500);
-      console.log(re)
-      res.send("Updated").status(200)
-      db.close();
+      
+        var query1 = {"_id":{"$eq":req.params.to}}
+        var newValue1 = {$push:{"requests":req.params.id}}
+        dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){
+          if(err) res.sendStatus(500)
+          res.send("Updated").status(200)
+          db.close();
+        })
     });
   });
 })

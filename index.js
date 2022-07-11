@@ -109,7 +109,20 @@ app.get("/feedbacks/:id", (req,res)=>{
     //db.close();
   });
 })
-
+app.get("/student/add-request/:id/:to", (req,res)=>{
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    var myquery = { "_id": {"$eq":req.params.id} };
+    var newvalues = { $push: {"requests":req.params.to} };
+    dbo.collection("student").updateOne(myquery, newvalues, function(err, re) {
+      if (err) res.sendStatus(500);
+      console.log(re)
+      res.send("Updated").status(200)
+      db.close();
+    });
+  });
+})
 app.post("/student/:id",async (req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;

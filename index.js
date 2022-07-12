@@ -114,17 +114,17 @@ app.get("/teacher/get-request/:id",(req,res)=>{
     if (err) throw err;
     var dbo = db.db("Students");
     let query = {"_id":{"$eq":req.params.id}}
-    const teacher = await dbo.collection("teacher").findOne(query,{sort:{_id:1}})
-    console.log(teacher);
-    /*let current = r[0]
-    request = []
-    for(i in current["requests"]){
-      re = current["requests"][i]
-      console.log(re)
+    dbo.collection("teacher").findOne(query,async function(err,rq){
+      if (err) res.send(err.message).status(500)
+    request_list = []
+    for(i in rq["requests"]){
+      re = await rq["requests"][i]
+      request_list.push(re)
     }
-    res.send(r).status(200);
+    res.send(request_list).status(200);
+    })
+    
     //db.close();
-    */
   });
 })
 app.get("/student/add-request/:id/:to", (req,res)=>{
@@ -142,7 +142,7 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
         var query1 = {"_id":{"$eq":req.params.to}}
         var obj = {
           "CMSID":req.params.id,
-          "name":stu["NAME"]
+          "name":stu["name"]
         }
         var newValue1 = {$push:{"requests":obj}}
         dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){

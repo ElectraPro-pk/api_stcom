@@ -95,6 +95,122 @@ app.post("/feedbacks/:id",(req,res)=>{
   res.sendStatus(200)
 })
 
+app.get("/student/get-friends/:CMSID",(req,res) => {
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.CMSID}}
+    
+    const teachs = dbo.collection("student").find(query,{sort: { title: 1 }});
+    let r = [];
+    await teachs.forEach(e =>{
+      r = e["friends"]
+    })
+    res.send(r).status(200);
+    db.close();
+})
+})
+app.get("/teacher/get-friends/:INSID",(req,res) => {
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.INSID}}
+    
+    const teachs = dbo.collection("teacher").find(query,{sort: { title: 1 }});
+    let r = [];
+    await teachs.forEach(e =>{
+      r = e["friends"]
+    })
+    res.send(r).status(200);
+    db.close();
+})
+})
+app.get("/teacher/accept-request/:INSID/:CMSID",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.INSID}}
+    dbo.collection("teacher").findOne(query, async function(err1,r){
+      if(err1) res.send(err1.message).status(500)
+      original_data = r
+      requests = await r["requests"]
+      friends = await r["friends"]
+      student_id = req.params.CMSID
+
+      for(i=0;i<requests.length;i++){
+        if(requests[i]["CMSID"] == student_id){
+          friends.push(requests[i])
+          requests.pop(i)
+        }
+      }
+      original_data["requests"] = requests
+      original_data["friends"] = friends
+      updatedVals = {$set:{"requests":requests,"friends":friends}}
+      dbo.collection("teacher").updateOne(query,updatedVals, function(err23,r23){
+        query = {"_id":{"$eq":req.params.CMSID}}
+        teacher_id = req.params.INSID
+
+        dbo.collection("student").findOne(query,async function(err3,r43){
+          stu_request = await r43["requests"]
+          stu_friends = await r43["friends"]
+          for(i=0;i<stu_request.length;i++){
+            if(stu_request[i] == teacher_id){
+              stu_friends.push(stu_request[i])
+              stu_request.splice(i,i+1)
+            }
+          }
+          updated_stu = {$set:{"requests":stu_request,"friends":stu_friends}}
+            dbo.collection("student").updateOne(query,updated_stu,function(e9,r9){
+              res.send("Accepted").status(200)
+              db.close();
+            })
+        })   
+      })     
+    })   
+  });
+})
+app.get("/teacher/reject-request/:INSID/:CMSID",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.INSID}}
+    dbo.collection("teacher").findOne(query, async function(err1,r){
+      if(err1) res.send(err1.message).status(500)
+      original_data = r
+      requests = await r["requests"]
+      student_id = req.params.CMSID
+
+      for(i=0;i<requests.length;i++){
+        if(requests[i]["CMSID"] == student_id){
+          requests.pop(i)
+        }
+      }
+      original_data["requests"] = requests
+      updatedVals = {$set:{"requests":requests}}
+      dbo.collection("teacher").updateOne(query,updatedVals, function(err23,r23){
+        query = {"_id":{"$eq":req.params.CMSID}}
+        teacher_id = req.params.INSID
+
+        dbo.collection("student").findOne(query,async function(err3,r43){
+          stu_request = await r43["requests"]
+          for(i=0;i<stu_request.length;i++){
+            if(stu_request[i] == teacher_id){
+              stu_request.splice(i,i+1)
+            }
+          }
+          updated_stu = {$set:{"requests":stu_request}}
+            dbo.collection("student").updateOne(query,updated_stu,function(e9,r9){
+              res.send("Rejected").status(200)
+              db.close();
+            })
+        })   
+      })     
+    })   
+  });
+})
+
+
+
 app.get("/feedbacks/:id", (req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;

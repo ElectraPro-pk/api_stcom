@@ -12,7 +12,20 @@ const students_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/a
 var TEACHERS = []
 var STUDENTS = []
 
-
+const findStudent = (key)=>{
+  for(i = 0 ;i< STUDENTS.length;i++){
+    if(STUDENTS[i]["CMSID"].includes(key)){
+      return STUDENTS[i]
+   }
+  }
+}
+const findTeacher = (key)=>{
+  for(i = 0 ;i< TEACHERS.length;i++){
+    if(TEACHERS[i]["INS_ID"].includes(key)){
+      return TEACHERS[i]
+   }
+  }
+}
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -32,7 +45,7 @@ const InsertData = (coll,data)=>{
 async function LoadStudents() {
   try {
     const response = await axios.get(students_url);
-    STUDENTS = response.data;  
+    STUDENTS = await response.data;  
     for(i in STUDENTS){
      st = STUDENTS[i]
      obj = {
@@ -244,11 +257,16 @@ app.get("/teacher/get-request/:id",(req,res)=>{
   });
 })
 app.get("/student/add-request/:id/:to", (req,res)=>{
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
     var myquery = { "_id": {"$eq":req.params.id} };
-    var newvalues = { $push: {"requests":req.params.to} };
+    _t = await findTeacher(res.params.to);
+    let t = {
+      "INS_ID":_t["INS_ID"],
+      "name":_t["NAME"].trim()
+    }
+    var newvalues = { $push: {"requests":t} };
     dbo.collection("student").updateOne(myquery, newvalues, async function(err, re) {
       if (err) res.send(err.message).Status(500);
       
@@ -323,12 +341,19 @@ app.get("/updateData",(req,res)=>{
   res.send("Students and Teachers are Updated Successfully")
 })
 app.get('/', (req, res) => {
+  if(STUDENTS.length == 0){
+    LoadStudents()
+  }
+  if(TEACHERS.length == 0){
+    LoadTeachers()
+  }
+  findTeacher("INS_0121")
   res.send('API FOR STCOM')
 })
 
-app.listen(port, () => {
-  LoadStudents();
-  LoadTeachers(); 
+app.listen(port, async () => {
+  await LoadStudents();
+  await LoadTeachers(); 
   console.log(`API Listening at  http://localhost:${port}`)
 })
 

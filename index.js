@@ -167,9 +167,9 @@ app.get("/teacher/accept-request/:INSID/:CMSID",(req,res)=>{
           stu_request = await r43["requests"]
           stu_friends = await r43["friends"]
           for(i=0;i<stu_request.length;i++){
-            if(stu_request[i] == teacher_id){
+            if(stu_request[i]["INS_ID"] == teacher_id){
               stu_friends.push(stu_request[i])
-              stu_request.splice(i,i+1)
+              stu_request.pop(i)
             }
           }
           updated_stu = {$set:{"requests":stu_request,"friends":stu_friends}}
@@ -207,8 +207,8 @@ app.get("/teacher/reject-request/:INSID/:CMSID",(req,res)=>{
         dbo.collection("student").findOne(query,async function(err3,r43){
           stu_request = await r43["requests"]
           for(i=0;i<stu_request.length;i++){
-            if(stu_request[i] == teacher_id){
-              stu_request.splice(i,i+1)
+            if(stu_request[i]["INS_ID"] == teacher_id){
+              stu_request.pop(i)
             }
           }
           updated_stu = {$set:{"requests":stu_request}}
@@ -261,7 +261,7 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
     if (err) throw err;
     var dbo = db.db("Students");
     var myquery = { "_id": {"$eq":req.params.id} };
-    _t = await findTeacher(res.params.to);
+    _t = await findTeacher(req.params.to);
     let t = {
       "INS_ID":_t["INS_ID"],
       "name":_t["NAME"].trim()

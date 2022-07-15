@@ -107,7 +107,63 @@ app.post("/feedbacks/:id",(req,res)=>{
   InsertData("feedbacks",obj) 
   res.sendStatus(200)
 })
+app.post("/teacher/allocate-time/:INS_ID",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let teacher_query = {"_id":{"$eq":req.params.INS_ID}} 
+    let student_query = {"_id":{"$eq":req.body.toID}} 
+    let slot = {
+      "CMSID":req.body.toID,
+      "stu_Name":req.body.toName,
+      "INS_ID":req.params.INS_ID,
+      "tch_Name":req.body.fromName,
+      "time":req.body.time,
+      "date":req.body.date,
+      "subject":req.body.title
+    }
+    let S =  {
+      $push:{"time_slots":slot}
+    }
+    dbo.collection("teacher").updateOne(teacher_query,S,function(err,r){
+      dbo.collection("student").updateOne(student_query,S,function(e,rs){
+        res.send("Allocated").status(200);
+      })
+    });
+    
+})
+})
 
+app.get("/teacher/get-slots/:INS_ID",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.INS_ID}}
+    
+    const teachs = dbo.collection("teacher").find(query,{sort: { title: 1 }});
+    let r = [];
+    await teachs.forEach(e =>{
+      r = e["time_slots"]
+    })
+    res.send(r).status(200);
+    db.close();
+})
+})
+app.get("/student/get-slots/:CMSID",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"_id":{"$eq":req.params.CMSID}}
+    
+    const teachs = dbo.collection("student").find(query,{sort: { title: 1 }});
+    let r = [];
+    await teachs.forEach(e =>{
+      r = e["time_slots"]
+    })
+    res.send(r).status(200);
+    db.close();
+})
+})
 app.get("/student/get-friends/:CMSID",(req,res) => {
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;

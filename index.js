@@ -5,7 +5,7 @@ const port = process.env.PORT || 5000
 var MongoClient = require('mongodb').MongoClient;
 const axios = require('axios');
 const bodyParser = require('body-parser');
-
+const { MongoDBNamespace } = require('mongodb');
 const url = "mongodb+srv://root:Root1895@students.lvpkb.mongodb.net/?retryWrites=true&w=majority";
 const teacher_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/teachers"
 const students_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/students"
@@ -29,7 +29,6 @@ const findTeacher = (key)=>{
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
 const InsertData = (coll,data)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
@@ -40,8 +39,6 @@ const InsertData = (coll,data)=>{
     });
   });
 }
-
-
 async function LoadStudents() {
   try {
     const response = await axios.get(students_url);
@@ -54,7 +51,8 @@ async function LoadStudents() {
       "friends":[],
       "requests":[],
       "time_slots":[],
-      "status":"Offline"
+      "status":"Offline",
+      "messages":[]
      }
      InsertData("student",obj)
     }
@@ -62,7 +60,6 @@ async function LoadStudents() {
     console.error(error);
   }
 }
-
 async function LoadTeachers() {
   try {
     const response = await axios.get(teacher_url);
@@ -76,7 +73,8 @@ async function LoadTeachers() {
       "friends":[],
       "requests":[],
       "time_slots":[],
-      "status":"Offline"
+      "status":"Offline",
+      "messages":[]
      }
      InsertData("teacher",obj)
     }
@@ -133,7 +131,6 @@ app.post("/teacher/allocate-time/:INS_ID",(req,res)=>{
     
 })
 })
-
 app.get("/teacher/get-slots/:INS_ID",(req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
@@ -277,9 +274,6 @@ app.get("/teacher/reject-request/:INSID/:CMSID",(req,res)=>{
     })   
   });
 })
-
-
-
 app.get("/feedbacks/:id", (req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
@@ -343,10 +337,68 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
     });
   });
 })
+app.post("/api/send-message/:senderType/:from/:to",(req,res)=>{
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    var query = { "_id": {"$eq":req.params.from} };
+    const senderType = req.params.senderType;
+    let message = {
+      "from":req.params.from,
+      "to":req.params.to,
+      "message":req.body.message,
+      "timestamp":new Date().toLocaleString()
+    }
+    var newvalues = { $push:{"messages":message }};
+    if(senderType == "teacher"){
+      dbo.collection("teacher").updateOne(query, newvalues, function(err, re) {
+        if (err) res.sendStatus(500); 
+        let q ={"_id":{"$eq":req.params.to}}
+        dbo.collection("student").updateOne(q,newvalues,function(e,r){
+          res.send("Sent").status(200)        
+        })
+      });
+    }else{
+      dbo.collection("student").updateOne(query, newvalues, function(err, re) {
+        if (err) res.sendStatus(500); 
+        let q ={"_id":{"$eq":req.params.to}}
+        dbo.collection("teacher").updateOne(q,newvalues,function(e,r){
+          res.send("Sent").status(200)         
+        })
+      });
+    }
+  });
+})
+app.get("/get-chat/:type/:from/:to",(req,res)=>{
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    var query = { "_id": {"$eq":req.params.from} };
+    const senderType = req.params.type;
+
+    if(senderType == "teacher"){
+      dbo.collection("teacher").findOne(query,async (err,result)=>{
+        if(err) res.sendStatus(500);
+        let chats = await result["messages"];
+        res.send(chats).status(200); 
+        db.close();
+      });
+    }
+    else{
+      dbo.collection("student").findOne(query,async (err,result)=>{
+        if(err) res.sendStatus(500);
+        let chats = await result["messages"];
+        res.send(chats).status(200);      
+        db.close();
+      });
+    }
+   
+  });
+})
 app.post("/student/:id",async (req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
-    var dbo = db.db("mydb");
+    var dbo = db.db("Students");
     var myquery = { "_id": {"$eq":req.params.id} };
     var newvalues = { $set: req.body };
     dbo.collection("student").updateOne(myquery, newvalues, function(err, re) {
@@ -356,8 +408,6 @@ app.post("/student/:id",async (req,res)=>{
     });
   });
 })
-
-
 app.get("/teacher/:id",async (req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
@@ -390,7 +440,6 @@ app.get("/student/:id",async (req,res)=>{
     })
   });
 })
-
 app.get("/updateData",(req,res)=>{
   LoadStudents()
   LoadTeachers()
@@ -406,7 +455,6 @@ app.get('/', (req, res) => {
   findTeacher("INS_0121")
   res.send('API FOR STCOM')
 })
-
 app.listen(port, async () => {
   await LoadStudents();
   await LoadTeachers(); 

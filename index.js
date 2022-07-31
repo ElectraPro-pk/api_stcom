@@ -6,8 +6,10 @@ var MongoClient = require('mongodb').MongoClient;
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const { MongoDBNamespace } = require('mongodb');
-const nodeMailer = require('nodemailer');
-
+const sgMail = require('@sendgrid/mail')
+const cors = require('cors');
+sgMail.setApiKey("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")
+app.use(cors());
 const url = "mongodb+srv://root:Root1895@students.lvpkb.mongodb.net/?retryWrites=true&w=majority";
 const teacher_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/teachers"
 const students_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/students"
@@ -447,29 +449,21 @@ app.get("/updateData",(req,res)=>{
   res.send("Students and Teachers are Updated Successfully")
 })
 app.get('/send-email/:to/:sender/:message', function (req, res) {
-  let transporter = nodeMailer.createTransport({
-      host: "smtp-mail.outlook.com",
-      auth: {
-          user: 'stcom20232@hotmail.com',
-          pass: 'stcom@123'
-      }
-  });
-  let mailOptions = {
-      from: '"Support STCOM" <stcom20232@hotmail.com>', // sender address
+
+  let msg = {
+      from: '"Support STCOM" <zeeshanrai2021@gmail.com>', // sender address
       to: req.params.to, // list of receivers
       subject: "Notification", // Subject line
+      text:" ",
       html: `<span>you have recieved message from <i>${req.params.sender}</i><br><b>${req.params.message}</b>` // html body
   };
-  
-  transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error)
-          res.send("Error").status(500)
-      }else{
-     
-          res.send("Sent").status(200)
-      }
-      });
+  sgMail
+  .send(msg)
+  .then(() => {
+    res.send("sent").status(200)
+  }, error => {
+    res.send("error").status(500)
+  });
   });
 
 

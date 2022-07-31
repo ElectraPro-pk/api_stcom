@@ -9,7 +9,9 @@ const { MongoDBNamespace } = require('mongodb');
 const sgMail = require('@sendgrid/mail')
 const cors = require('cors');
 sgMail.setApiKey("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")
-app.use(cors());
+app.use(cors({
+  origin:'https://apistcom.herokuapp.com'
+}));
 const url = "mongodb+srv://root:Root1895@students.lvpkb.mongodb.net/?retryWrites=true&w=majority";
 const teacher_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/teachers"
 const students_url = "https://apps.iba-suk.edu.pk/stcom-student-project/public/api/students"

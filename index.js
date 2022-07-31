@@ -446,7 +446,7 @@ app.get("/updateData",(req,res)=>{
   LoadTeachers()
   res.send("Students and Teachers are Updated Successfully")
 })
-app.post('/send-email/', function (req, res) {
+app.get('/send-email/:to/:sender/:message', function (req, res) {
   let transporter = nodeMailer.createTransport({
       host: "smtp-mail.outlook.com",
       auth: {
@@ -456,9 +456,9 @@ app.post('/send-email/', function (req, res) {
   });
   let mailOptions = {
       from: '"Support STCOM" <stcom20232@hotmail.com>', // sender address
-      to: req.body.to, // list of receivers
+      to: req.params.to, // list of receivers
       subject: "Notification", // Subject line
-      html: `<span>you have recieved message from <i>${req.body.sender}</i><br><b>${req.body.message}</b>` // html body
+      html: `<span>you have recieved message from <i>${req.params.sender}</i><br><b>${req.params.message}</b>` // html body
   };
   
   transporter.sendMail(mailOptions, (error, info) => {

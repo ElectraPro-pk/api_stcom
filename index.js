@@ -312,7 +312,7 @@ app.get("/teacher/get-request/:id",(req,res)=>{
     //db.close();
   });
 })
-app.get("/student/add-request/:id/:to", (req,res)=>{
+app.get("/student/add-request/:id/:to/:date/:time", (req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
@@ -320,7 +320,11 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
     _t = await findTeacher(req.params.to);
     let t = {
       "INS_ID":_t["INS_ID"],
-      "name":_t["NAME"].trim()
+      "name":_t["NAME"].trim(),
+      "date":req.params.date,
+      "time":req.params.time,
+      "location":""
+
     }
     var newvalues = { $push: {"requests":t} };
     dbo.collection("student").updateOne(myquery, newvalues, async function(err, re) {
@@ -332,7 +336,10 @@ app.get("/student/add-request/:id/:to", (req,res)=>{
         var query1 = {"_id":{"$eq":req.params.to}}
         var obj = {
           "CMSID":req.params.id,
-          "name":stu["name"]
+          "name":stu["name"],
+          "date":req.params.date,
+      "time":req.params.time,
+      "location":""
         }
         var newValue1 = {$push:{"requests":obj}}
         dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){

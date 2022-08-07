@@ -221,7 +221,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID/:location",(req,res)=>{
 
       for(i=0;i<requests.length;i++){
         if(requests[i]["CMSID"] == student_id){
-          requests[i]["location"] = req.params.location; 
+          requests[i]["location"] = req.params.location.replaceAll(" ","-"); 
           friends.push(requests[i])
           requests.pop(i)
         }
@@ -238,7 +238,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID/:location",(req,res)=>{
           stu_friends = await r43["friends"]
           for(i=0;i<stu_request.length;i++){
             if(stu_request[i]["INS_ID"] == teacher_id){
-              requests[i]["location"] = req.params.location; 
+              requests[i]["location"] = req.params.location.replaceAll(" ","-"); 
               stu_friends.push(stu_request[i])
               stu_request.pop(i)
             }

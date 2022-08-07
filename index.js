@@ -207,7 +207,7 @@ app.get("/teacher/get-friends/:INSID",(req,res) => {
     db.close();
 })
 })
-app.get("/teacher/accept-request/:INSID/:CMSID",(req,res)=>{
+app.get("/teacher/accept-request/:INSID/:CMSID/:location",(req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
@@ -221,6 +221,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID",(req,res)=>{
 
       for(i=0;i<requests.length;i++){
         if(requests[i]["CMSID"] == student_id){
+          requests[i]["location"] = req.params.location; 
           friends.push(requests[i])
           requests.pop(i)
         }
@@ -237,6 +238,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID",(req,res)=>{
           stu_friends = await r43["friends"]
           for(i=0;i<stu_request.length;i++){
             if(stu_request[i]["INS_ID"] == teacher_id){
+              requests[i]["location"] = req.params.location; 
               stu_friends.push(stu_request[i])
               stu_request.pop(i)
             }

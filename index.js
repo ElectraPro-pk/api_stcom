@@ -362,6 +362,10 @@ app.get("/student/add-request/:id/:to/:date/:time", (req,res)=>{
     });
   });
 })
+
+app.get("/update-meeting/:tch/:stu/:dt/:tm/:lc",function(req,res){
+  req.send("Success").status(200)
+})
 app.post("/api/send-message/:senderType/:from/:to",(req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;

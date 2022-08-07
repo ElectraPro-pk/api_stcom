@@ -55,6 +55,7 @@ async function LoadStudents() {
       "_id" : st["CMSID"].trim(),
       "name":st["NAME"].trim(),
       "friends":[],
+      "department":st["DEPARTMENT"].trim(),
       "requests":[],
       "time_slots":[],
       "status":"Offline",

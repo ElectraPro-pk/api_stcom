@@ -67,8 +67,17 @@ async function LoadStudents() {
     console.error(error);
   }
 }
+async function clearData(){
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    dbo.collection("teacher").deleteMany({});
+    dbo.collection("student").deleteMany({});
+  });
+}
 async function LoadTeachers() {
   try {
+    
     const response = await axios.get(teacher_url);
     TEACHERS = response.data;  
     for(i in TEACHERS){
@@ -453,7 +462,8 @@ app.get("/student/:id",async (req,res)=>{
     })
   });
 })
-app.get("/updateData",(req,res)=>{
+app.get("/updateData",async (req,res)=>{
+  await clearData();
   LoadStudents()
   LoadTeachers()
   res.send("Students and Teachers are Updated Successfully")

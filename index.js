@@ -122,12 +122,14 @@ app.post("/feedbacks/:id",(req,res)=>{
   res.sendStatus(200)
 })
 app.post("/teacher/allocate-time/:INS_ID",(req,res)=>{
+  const uuid = require('uuid');
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;
     var dbo = db.db("Students");
     let teacher_query = {"_id":{"$eq":req.params.INS_ID}} 
     let student_query = {"_id":{"$eq":req.body.toID}} 
     let slot = {
+      "uid":uuid.v1().split("-")[0],
       "CMSID":req.body.toID,
       "stu_Name":req.body.toName,
       "INS_ID":req.params.INS_ID,
@@ -322,6 +324,44 @@ app.get("/teacher/get-request/:id",(req,res)=>{
     })
     
     //db.close();
+  });
+})
+app.get("/updateSlot/:tp/:id/:dt/:tm",(req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    var myquery = { "_id": {"$eq":req.params.id} };
+    _t = await findTeacher(req.params.to);
+    let t = {
+      "INS_ID":_t["INS_ID"],
+      "name":_t["NAME"].trim(),
+      "date":req.params.date,
+      "time":req.params.time,
+      "location":""
+
+    }
+    var newvalues = { $push: {"requests":t} };
+    dbo.collection("student").updateOne(myquery, newvalues, async function(err, re) {
+      if (err) res.send(err.message).Status(500);
+      
+      
+      const stu = await dbo.collection("student").findOne(myquery,{sort: { _id: 1 }})
+        console.log(stu)
+        var query1 = {"_id":{"$eq":req.params.to}}
+        var obj = {
+          "CMSID":req.params.id,
+          "name":stu["name"],
+          "date":req.params.date,
+      "time":req.params.time,
+      "location":""
+        }
+        var newValue1 = {$push:{"requests":obj}}
+        dbo.collection("teacher").updateOne(query1,newValue1,function(err,r){
+          if(err) res.send(err.message).Status(500);
+          res.send("Updated").status(200)
+          db.close();
+        })
+    });
   });
 })
 app.get("/student/add-request/:id/:to/:date/:time", (req,res)=>{

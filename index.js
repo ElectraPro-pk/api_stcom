@@ -369,6 +369,7 @@ app.get("/teacher/add-request/:id/:to/:date/:time", (req,res)=>{
     var dbo = db.db("Students");
     var myquery = { "_id": {"$eq":req.params.id} };
     _t = await findStudent(req.params.to);
+    console.log(_t)
     let t = {
       "INS_ID":_t["CMSID"],
       "name":_t["NAME"].trim(),

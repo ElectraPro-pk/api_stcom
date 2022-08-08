@@ -370,7 +370,7 @@ app.get("/teacher/add-request/:id/:to/:date/:time", (req,res)=>{
     var myquery = { "_id": {"$eq":req.params.id} };
     _t = await findStudent(req.params.to);
     let t = {
-      "INS_ID":_t["INS_ID"],
+      "INS_ID":_t["CMSID"],
       "name":_t["NAME"].trim(),
       "date":req.params.date,
       "time":req.params.time,
@@ -386,7 +386,7 @@ app.get("/teacher/add-request/:id/:to/:date/:time", (req,res)=>{
         console.log(stu)
         var query1 = {"_id":{"$eq":req.params.to}}
         var obj = {
-          "CMSID":req.params.id,
+          "INS_ID":req.params.id,
           "name":stu["name"],
           "date":req.params.date,
       "time":req.params.time,

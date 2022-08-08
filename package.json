@@ -30,6 +30,7 @@
     "fetch": "^1.1.0",
     "mongodb": "^4.7.0",
     "node-fetch": "2.0",
-    "nodemailer": "^6.7.7"
+    "nodemailer": "^6.7.7",
+    "uuid": "^8.3.2"
   }
 }

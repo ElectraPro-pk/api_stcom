@@ -382,7 +382,7 @@ app.get("/teacher/add-request/:id/:to/:date/:time", (req,res)=>{
       if (err) res.send(err.message).Status(500);
       
       
-      const stu = await dbo.collection("student").findOne(myquery,{sort: { _id: 1 }})
+      const stu = await dbo.collection("teacher").findOne(myquery,{sort: { _id: 1 }})
         console.log(stu)
         var query1 = {"_id":{"$eq":req.params.to}}
         var obj = {

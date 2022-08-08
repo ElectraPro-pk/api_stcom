@@ -164,7 +164,7 @@ const deleteFromStudent = (id,uid)=>{
       }
     }
     var updateSlot = {"$set":{"time_slots":slots}}
-    dbo.collection("student").updateOne(query,updateSlot,function(e,r){
+    dbo.collection("student").updateOne(query,updateSlot,async function(e,r){
 
       var query1 = {"INS_ID":INS_ID};
       var tch = dbo.collection("teacher").findOne(query1,{sort: { title: 1 }})
@@ -200,7 +200,7 @@ const deleteFromTeacher = (id,uid)=>{
       }
     }
     var updateSlot = {"$set":{"time_slots":slots}}
-    dbo.collection("teacher").updateOne(query,updateSlot,function(e,r){
+    dbo.collection("teacher").updateOne(query,updateSlot,async function(e,r){
 
       var query1 = {"CMSID":CMSID};
       var tch = dbo.collection("student").findOne(query1,{sort: { title: 1 }})

@@ -363,6 +363,45 @@ app.get("/student/add-request/:id/:to/:date/:time", (req,res)=>{
   });
 })
 
+app.get("/teacher/add-request/:id/:to/:date/:time", (req,res)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    var myquery = { "_id": {"$eq":req.params.id} };
+    _t = await findStudent(req.params.to);
+    let t = {
+      "INS_ID":_t["INS_ID"],
+      "name":_t["NAME"].trim(),
+      "date":req.params.date,
+      "time":req.params.time,
+      "location":""
+
+    }
+    var newvalues = { $push: {"requests":t} };
+    dbo.collection("teacher").updateOne(myquery, newvalues, async function(err, re) {
+      if (err) res.send(err.message).Status(500);
+      
+      
+      const stu = await dbo.collection("student").findOne(myquery,{sort: { _id: 1 }})
+        console.log(stu)
+        var query1 = {"_id":{"$eq":req.params.to}}
+        var obj = {
+          "CMSID":req.params.id,
+          "name":stu["name"],
+          "date":req.params.date,
+      "time":req.params.time,
+      "location":""
+        }
+        var newValue1 = {$push:{"requests":obj}}
+        dbo.collection("student").updateOne(query1,newValue1,function(err,r){
+          if(err) res.send(err.message).Status(500);
+          res.send("Updated").status(200)
+          db.close();
+        })
+    });
+  });
+})
+
 app.get("/update-meeting/:tch/:stu/:dt/:tm/:lc",function(req,res){
   res.send("Success").status(200)
 })

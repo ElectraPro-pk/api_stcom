@@ -149,6 +149,85 @@ app.post("/teacher/allocate-time/:INS_ID",(req,res)=>{
     
 })
 })
+const deleteFromStudent = (id,uid)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"CMSID":id}
+    let stu = await dbo.collection("student").findOne(query,{sort: { title: 1 }})
+    let slots = await stu["time_slots"]
+    let INS_ID = "";
+    for(i = 0;i<slots.length;i++){
+      if(slots[i]["uid"] == uid){
+        INS_ID = slots[i]["INS_ID"]
+        slots.pop(i);
+      }
+    }
+    var updateSlot = {"$set":{"time_slots":slots}}
+    dbo.collection("student").updateOne(query,updateSlot,function(e,r){
+
+      var query1 = {"INS_ID":INS_ID};
+      var tch = dbo.collection("teacher").findOne(query1,{sort: { title: 1 }})
+      let slotsq = await tch["time_slots"]
+      for(i = 0;i<slotsq.length;i++){
+        if(slotsq[i]["uid"] == uid){
+          
+          slotsq.pop(i);
+        }
+      }
+      var updateSlot = {"$set":{"time_slots":slotsq}}
+      dbo.collection("teacher").updateOne(query,updateSlot,function(e,r){
+
+        return "Done"
+      })
+
+
+    });
+})
+}
+const deleteFromTeacher = (id,uid)=>{
+  MongoClient.connect(url, async function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Students");
+    let query = {"INS_ID":id}
+    let stu = await dbo.collection("teacher").findOne(query,{sort: { title: 1 }})
+    let slots = await stu["time_slots"]
+    let CMSID = "";
+    for(i = 0;i<slots.length;i++){
+      if(slots[i]["uid"] == uid){
+        CMSID = slots[i]["CMSID"]
+        slots.pop(i);
+      }
+    }
+    var updateSlot = {"$set":{"time_slots":slots}}
+    dbo.collection("teacher").updateOne(query,updateSlot,function(e,r){
+
+      var query1 = {"CMSID":CMSID};
+      var tch = dbo.collection("student").findOne(query1,{sort: { title: 1 }})
+      let slotsq = await tch["time_slots"]
+      for(i = 0;i<slotsq.length;i++){
+        if(slotsq[i]["uid"] == uid){
+          
+          slotsq.pop(i);
+        }
+      }
+      var updateSlot = {"$set":{"time_slots":slotsq}}
+      dbo.collection("student").updateOne(query,updateSlot,function(e,r){
+
+        return "Done"
+      })
+
+
+    });
+})
+}
+app.get("/delete-meeting/:type/:id/:uid",(req,res)=>{
+  if(req.params.type == "teacher"){
+    req.send(deleteFromTeacher(req.params.id,req.params.uid))
+  }else{
+    req.send(deleteFromStudent(req.params.id,req.params.uid))
+  }
+})
 app.get("/teacher/get-slots/:INS_ID",(req,res)=>{
   MongoClient.connect(url, async function(err, db) {
     if (err) throw err;

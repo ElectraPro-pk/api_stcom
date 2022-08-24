@@ -322,7 +322,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID/:location",(req,res)=>{
         if(requests[i]["CMSID"] == student_id){
           requests[i]["location"] = req.params.location.replaceAll(" ","-"); 
           friends.push(requests[i])
-          requests.pop(i)
+          requests.slice(i,i)
         }
       }
       original_data["requests"] = requests
@@ -339,7 +339,7 @@ app.get("/teacher/accept-request/:INSID/:CMSID/:location",(req,res)=>{
             if(stu_request[i]["INS_ID"] == teacher_id){
               requests[i]["location"] = req.params.location.replaceAll(" ","-"); 
               stu_friends.push(stu_request[i])
-              stu_request.pop(i)
+              stu_request.slice(i,i)
             }
           }
           updated_stu = {$set:{"requests":stu_request,"friends":stu_friends}}

@@ -573,6 +573,15 @@ app.post("/api/send-message/:senderType/:from/:to",(req,res)=>{
     }
   });
 })
+const filterChat = (arr,from,to)=>{
+  fil = []
+  for(i =0;i<arr.length;i++){
+    if(arr[i]["from"] == from && arr[i]["to"] == to){
+fil.push(arr[i])
+    }
+  }
+  return fil
+}
 app.get("/get-chat/:type/:from/:to",(req,res)=>{
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
@@ -583,6 +592,7 @@ app.get("/get-chat/:type/:from/:to",(req,res)=>{
       dbo.collection("teacher").findOne(query,async (err,result)=>{
         if(err) res.sendStatus(500);
         let chats = await result["messages"];
+        chats = filterChat(chats,req.params.from,req.params.to);
         res.send(chats).status(200); 
         db.close();
       });
@@ -591,6 +601,7 @@ app.get("/get-chat/:type/:from/:to",(req,res)=>{
       dbo.collection("student").findOne(query,async (err,result)=>{
         if(err) res.sendStatus(500);
         let chats = await result["messages"];
+        chats = filterChat(chats,req.params.from,req.params.to);
         res.send(chats).status(200);      
         db.close();
       });

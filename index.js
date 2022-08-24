@@ -81,7 +81,7 @@ async function LoadTeachers() {
   try {
     
     const response = await axios.get(teacher_url);
-    TEACHERS = response.data;  
+    TEACHERS = await response.data;  
     for(i in TEACHERS){
      st = TEACHERS[i]
     
@@ -473,13 +473,10 @@ app.get("/student/add-request/:id/:to/:date/:time", (req,res)=>{
       "date":req.params.date,
       "time":req.params.time,
       "location":""
-
     }
     var newvalues = { $push: {"requests":t} };
     dbo.collection("student").updateOne(myquery, newvalues, async function(err, re) {
       if (err) res.send(err.message).Status(500);
-      
-      
       const stu = await dbo.collection("student").findOne(myquery,{sort: { _id: 1 }})
         console.log(stu)
         var query1 = {"_id":{"$eq":req.params.to}}

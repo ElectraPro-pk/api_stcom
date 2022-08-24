@@ -51,6 +51,7 @@ async function LoadStudents() {
     STUDENTS = await response.data;  
     for(i in STUDENTS){
      st = STUDENTS[i]
+     
      obj = {
       "_id" : st["CMSID"].trim(),
       "name":st["NAME"].trim(),
@@ -61,6 +62,7 @@ async function LoadStudents() {
       "status":"Offline",
       "messages":[]
      }
+  
      InsertData("student",obj)
     }
   } catch (error) {
@@ -577,7 +579,7 @@ const filterChat = (arr,from,to)=>{
   fil = []
   for(i =0;i<arr.length;i++){
     if(arr[i]["from"] == from && arr[i]["to"] == to){
-fil.push(arr[i])
+      fil.push(arr[i])
     }
   }
   return fil
@@ -655,43 +657,26 @@ app.get("/student/:id",async (req,res)=>{
   });
 })
 app.get("/updateData",async (req,res)=>{
-  await clearData();
-  LoadStudents()
-  LoadTeachers()
+  await clearData()
+  await LoadStudents()
+  await LoadTeachers()
   res.send("Students and Teachers are Updated Successfully")
 })
-app.get('/send-email/:to/:sender/:message', function (req, res) {
-
-  let msg = {
-      from: '"Support STCOM" <zeeshanrai2021@gmail.com>', // sender address
-      to: req.params.to, // list of receivers
-      subject: "Notification", // Subject line
-      text:" ",
-      html: `<span>you have recieved message from <i>${req.params.sender}</i><br><b>${req.params.message}</b>` // html body
-  };
-  sgMail
-  .send(msg)
-  .then(() => {
-    res.send("sent").status(200)
-  }, error => {
-    res.send("error").status(500)
-  });
-  });
 
 
-app.get('/', (req, res) => {
+
+app.get('/',async (req, res) => {
   if(STUDENTS.length == 0){
-    LoadStudents()
+    await LoadStudents()
   }
   if(TEACHERS.length == 0){
-    LoadTeachers()
+    await LoadTeachers()
   }
-  findTeacher("INS_0121")
   res.send('API FOR STCOM')
 })
 app.listen(port, async () => {
-  await LoadStudents();
-  await LoadTeachers(); 
+  //await LoadStudents();
+  //await LoadTeachers(); 
   console.log(`API Listening at  http://localhost:${port}`)
 })
 

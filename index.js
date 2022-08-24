@@ -603,7 +603,7 @@ app.get("/get-chat/:type/:from/:to",(req,res)=>{
       dbo.collection("student").findOne(query,async (err,result)=>{
         if(err) res.sendStatus(500);
         let chats = await result["messages"];
-        chats = filterChat(chats,req.params.from,req.params.to);
+        chats = filterChat(req.params.to,chats,req.params.from);
         res.send(chats).status(200);      
         db.close();
       });

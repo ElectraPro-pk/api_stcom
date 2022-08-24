@@ -672,8 +672,8 @@ app.get('/',async (req, res) => {
   res.send('API FOR STCOM')
 })
 app.listen(port, async () => {
-  //await LoadStudents();
-  //await LoadTeachers(); 
+  await LoadStudents();
+  await LoadTeachers(); 
   console.log(`API Listening at  http://localhost:${port}`)
 })
 

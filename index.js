@@ -575,7 +575,7 @@ app.post("/api/send-message/:senderType/:from/:to",(req,res)=>{
 const filterChat = (arr,from,to)=>{
   fil = []
   for(i =0;i<arr.length;i++){
-    if(arr[i]["from"] == from && arr[i]["to"] == to){
+    if((arr[i]["from"] == from && arr[i]["to"] == to)||(arr[i]["from"] == to && arr[i]["to"] == from)){
       fil.push(arr[i])
     }
   }
